@@ -13,10 +13,12 @@ import { Button } from "../ui/button";
 import { DialogHeader } from "../ui/dialog";
 import { Badge } from "../ui/badge";
 import { PlusCircle } from "lucide-react";
+import { useAppKitAccount } from "@reown/appkit/react";
 
 export const Header = () => {
-  const { airService, isLoggedIn, loginResult } = useAirkit();
-
+  const { airService } = useAirkit();
+  const { address } = useAppKitAccount();
+  
   const logout = async () => {
     if (airService.isLoggedIn) {
       await airService.logout();
@@ -43,7 +45,7 @@ export const Header = () => {
             Advertise with us
           </Button>
         </Link>
-        {isLoggedIn ? (
+        {airService.isLoggedIn ? (
           <Dialog>
             <DialogTrigger asChild>
               <Button variant="outline" size="sm" className="mr-4 cursor-pointer">
@@ -58,8 +60,8 @@ export const Header = () => {
                 <div>
                   <p className="text-sm text-muted-foreground">Address</p>
                   <p className="font-mono text-sm">
-                    {loginResult?.abstractAccountAddress
-                      ? formatAddress(loginResult?.abstractAccountAddress)
+                    {airService.isLoggedIn
+                      ? formatAddress(address!)
                       : "N/A"}
                   </p>
                 </div>
