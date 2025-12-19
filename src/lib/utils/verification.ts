@@ -1,0 +1,1 @@
+export const VERIFIER_URL = `/verify?partnerId=oyunfor&rule=wallet_balance_gt_1000&successUrl=/okx&failUrl=/fallback`;

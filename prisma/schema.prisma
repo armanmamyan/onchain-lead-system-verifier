@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator json {
+  provider = "prisma-json-types-generator"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ENUM
+enum AdSubmissionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  ACTIVE
+  EXPIRED
+}
+
+// AUTH
+
+model Admin {
+  id            String          @id @default(uuid())
+  username      String          @unique
+  password      String
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  adSubmissions AdSubmission[]
+}
+
+// AD SUBMISSIONS
+
+model AdSubmission {
+  id                   String              @id @default(uuid())
+  adName               String
+  adDescription        String              @db.Text
+  maximumIssuance      Int
+  accessibleFrom       DateTime
+  accessibleUntil      DateTime
+  contactEmail         String
+  contactPersonName    String
+  status               AdSubmissionStatus  @default(PENDING)
+
+  // Relations
+  createdBy            Admin?              @relation(fields: [createdById], references: [id])
+  createdById          String?
+
+  // Metadata
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
