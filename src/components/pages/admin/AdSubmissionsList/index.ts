@@ -1,2 +1,2 @@
-export { AdSubmissionsList } from "./AdSubmissionsList";
+export { default } from "./AdSubmissionsList";
 

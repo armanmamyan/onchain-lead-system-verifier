@@ -292,9 +292,11 @@ const verifyCredential = async () => {
     programId: VERIFIER_PROGRAM_ID,
     redirectUrl: ISSUER_URL,
   });
-  
+
   // 3. Check against rule
-  if (result?.credentialSubject?.balanceUsd > requiredBalance) {
+  // Note: Use bracket notation for kebab-case properties
+  const userBalance = result?.credentialSubject?.["balance-usd"] || 0;
+  if (userBalance > requiredBalance) {
     // SUCCESS - redirect to successUrl
   } else {
     // FAIL - redirect to failUrl
@@ -361,7 +363,7 @@ const verifyCredential = async () => {
 A: Yes! Partners must issue credentials first. Users without credentials will fail verification and be directed to the fallback page.
 
 **Q: Can I use external URLs for successUrl/failUrl?**
-A: In production, yes. In this POC, use internal routes like `/okx` or `/fallback`.
+A: Yes! Both internal routes (e.g., `/okx`, `/fallback`) and external URLs (e.g., `https://advertiser.com/offer`) are fully supported.
 
 **Q: How do I set custom balance requirements?**
 A: Use the `rule` parameter: `rule=wallet_balance_gt_5000` for $5,000 minimum.

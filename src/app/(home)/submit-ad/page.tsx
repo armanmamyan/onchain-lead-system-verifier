@@ -1,4 +1,4 @@
-import { AdSubmissionForm } from "@/components/pages/admin/AdSubmissionForm";
+import AdSubmissionForm from "@/components/pages/admin/AdSubmissionForm";
 
 const SubmitAdPage = () => {
   return (

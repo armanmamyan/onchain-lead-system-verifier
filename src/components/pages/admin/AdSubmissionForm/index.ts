@@ -1,2 +1,2 @@
-export { AdSubmissionForm } from "./AdSubmissionForm";
+export { default } from "./AdSubmissionForm";
 

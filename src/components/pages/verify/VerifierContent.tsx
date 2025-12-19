@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { useAirkit } from "@/hooks/useAirkit";
 import { env } from "@/lib/env";
+import { parseRule } from "@/lib/utils/verification";
 import axios from "axios";
 
 type AuthTokenResponse = {
@@ -34,12 +35,6 @@ type VerificationStatus =
   | "verifying"
   | "success"
   | "failed";
-
-const parseRule = (ruleString: string): number => {
-  const parts = ruleString.split("_");
-  const threshold = parts[parts.length - 1];
-  return parseInt(threshold) || 1000;
-};
 const VerifierContent = ({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) => {
   const router = useRouter();
   const { airService, isInitialized } = useAirkit();
@@ -55,6 +50,15 @@ const VerifierContent = ({ searchParams }: { searchParams: Promise<{ [key: strin
   const rule = params.rule as string || "wallet_balance_gt_1000";
   const requiredBalance = parseRule(rule);
 
+  const handleRedirect = (url: string) => {
+    // Check if URL is external (starts with http:// or https://)
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      window.location.href = url;
+    } else {
+      router.push(url);
+    }
+  };
+
   // Countdown redirect
   useEffect(() => {
     if (countdown !== null && countdown > 0) {
@@ -62,11 +66,12 @@ const VerifierContent = ({ searchParams }: { searchParams: Promise<{ [key: strin
       return () => clearTimeout(timer);
     } else if (countdown === 0) {
       if (status === "success") {
-        router.push(successUrl);
+        handleRedirect(successUrl);
       } else if (status === "failed") {
-        router.push(failUrl);
+        handleRedirect(failUrl);
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [countdown, status, successUrl, failUrl, router]);
 
   useEffect(() => {

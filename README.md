@@ -208,13 +208,13 @@ The verifier at `/verify` accepts these parameters:
 | `failUrl` | string | `"/fallback"` | Where to redirect on failure |
 | `rule` | string | `"wallet_balance_gt_1000"` | Verification criteria |
 
-### Example URLs (All internal routes)
+### Example URLs
 
 ```bash
-# Basic verification
+# Basic verification (internal routes)
 /verify
 
-# Full parameters
+# Full parameters (internal routes)
 /verify?partnerId=oyunfor&successUrl=/okx&failUrl=/fallback&rule=wallet_balance_gt_1000
 
 # Different threshold ($500)
@@ -222,6 +222,12 @@ The verifier at `/verify` accepts these parameters:
 
 # Custom partner
 /verify?partnerId=premium&successUrl=/premium&failUrl=/upgrade&rule=wallet_balance_gt_5000
+
+# Production example with external URLs
+/verify?partnerId=oyunfor&successUrl=https://advertiser.com/premium&failUrl=https://partner.com/upgrade&rule=wallet_balance_gt_1000
+
+# Mixed: external success, internal fail
+/verify?partnerId=nftplatform&successUrl=https://nft-drop.com/mint&failUrl=/fallback&rule=wallet_balance_gt_5000
 ```
 
 ---
@@ -242,14 +248,24 @@ wallet_balance_gt_{threshold}
 | `wallet_balance_gt_5000` | > $5,000 |
 | `wallet_balance_gt_10000` | > $10,000 |
 
-### Rule Parser
+### Verification Utilities
+
+Located in `src/lib/utils/verification.ts`:
 
 ```typescript
-const parseRule = (ruleString: string): number => {
-  const parts = ruleString.split("_");
-  const threshold = parts[parts.length - 1];
-  return parseInt(threshold) || 1000;
-};
+// Parse rule string to extract threshold
+import { parseRule } from "@/lib/utils/verification";
+const threshold = parseRule("wallet_balance_gt_1000"); // Returns 1000
+
+// Build custom verifier URLs
+import { buildVerifierUrl } from "@/lib/utils/verification";
+const url = buildVerifierUrl({
+  partnerId: "myPartner",
+  rule: "wallet_balance_gt_5000",
+  successUrl: "https://advertiser.com/premium",
+  failUrl: "/fallback"
+});
+// Returns: /verify?partnerId=myPartner&rule=wallet_balance_gt_5000&successUrl=https%3A%2F%2Fadvertiser.com%2Fpremium&failUrl=%2Ffallback
 ```
 
 ---
@@ -295,8 +311,15 @@ NEXT_PUBLIC_VERIFIER_PROGRAM_ID="your-verifier-program-id"
 NEXT_PUBLIC_ISSUER_URL="https://developers.sandbox.air3.com"
 
 # ═══════════════════════════════════════════════════════════════════
-# JWT KEYS (For signing auth tokens)
-# Generate: openssl genpkey -algorithm RSA -out private.key -pkeyopt rsa_keygen_bits:2048
+# JWT KEYS (RS256 - RSA Algorithm)
+# Generate RSA key pair:
+#   1. Generate private key:
+#      openssl genpkey -algorithm RSA -out private.key -pkeyopt rsa_keygen_bits:2048
+#   2. Extract public key:
+#      openssl rsa -pubout -in private.key -out public.key
+#   3. Convert to single-line format (remove headers/newlines):
+#      cat private.key | tr -d '\n' | sed 's/-----BEGIN PRIVATE KEY-----//g' | sed 's/-----END PRIVATE KEY-----//g'
+#      cat public.key | tr -d '\n' | sed 's/-----BEGIN PUBLIC KEY-----//g' | sed 's/-----END PUBLIC KEY-----//g'
 # ═══════════════════════════════════════════════════════════════════
 PARTNER_PRIVATE_KEY="MIIEvgIBADANBgkqhkiG9w0BAQEFA..."
 PARTNER_PUBLIC_KEY="MIIBIjANBgkqhkiG9w0BAQEFAAOCA..."

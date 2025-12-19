@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { VERIFIER_URL } from "@/lib/utils/verification";
+// To create custom verifier URLs, use: buildVerifierUrl({ rule: "wallet_balance_gt_5000", successUrl: "https://..." })
 
 const Footer = () => (
     <footer className="border-t bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm mt-12">

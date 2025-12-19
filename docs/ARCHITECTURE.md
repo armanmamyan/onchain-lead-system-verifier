@@ -187,8 +187,8 @@ This POC simulates **4 distinct parties** in a single Next.js application:
 │  │   redirectUrl: ISSUER_URL                                              │ │
 │  │ });                                                                    │ │
 │  │                                                                        │ │
-│  │ // Check result                                                        │ │
-│  │ const userBalance = result?.credentialSubject?.balanceUsd || 0;        │ │
+│  │ // Check result (use bracket notation for kebab-case)                 │ │
+│  │ const userBalance = result?.credentialSubject?.["balance-usd"] || 0;   │ │
 │  └────────────────────────────────────────────────────────────────────────┘ │
 │                                  │                                           │
 │              ┌───────────────────┴───────────────────┐                      │
