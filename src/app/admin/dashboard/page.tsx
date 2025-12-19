@@ -1,4 +1,4 @@
-import { AdSubmissionsList } from "@/components/pages/admin/AdSubmissionsList";
+import AdSubmissionsList from "@/components/pages/admin/AdSubmissionsList";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 
