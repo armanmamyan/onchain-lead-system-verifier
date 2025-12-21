@@ -35,6 +35,7 @@ import { Alchemy, Network } from "alchemy-sdk";
 import { BalanceData } from "@/lib/types";
 import { useSignMessage } from "wagmi";
 import { getEthPrice, getTokenPrice, walletMessage } from "@/lib/utils/web3";
+import { createOrUpdateUser } from "@/lib/actions/users";
 
 const alchemy = new Alchemy({
   apiKey: process.env.NEXT_PUBLIC_ALCHEMY_ID,
@@ -81,6 +82,17 @@ const IssueCredential = () => {
   const { disconnect } = useDisconnect();
   const { open } = useAppKit();
   const signMessage = useSignMessage();
+
+  const getUserInfo = useCallback(async () => {
+    if (airService.isLoggedIn) {
+      const userData = await airService.getUserInfo();
+      return {
+        email: userData.user.email,
+        id: userData.user.id,
+      };
+    }
+    return null;
+  }, [airService]);
   
   const fetchBalance = useCallback(async (walletAddress: `0x${string}`) => {
     try {
@@ -208,6 +220,18 @@ const IssueCredential = () => {
         credentialId: env.NEXT_PUBLIC_PROGRAM_ID!,
         credentialSubject,
       });
+
+      // Get AIR Kit user info and register the user in database
+      const userInfo = await getUserInfo();
+      if (userInfo) {
+        await createOrUpdateUser({
+          walletAddress: address,
+          airKitId: userInfo.id,
+          airKitEmail: userInfo.email || "",
+          isCredentialIssued: true,
+          credentialSubject: JSON.stringify(credentialSubject),
+        });
+      }
      
       setStep(4);
     } catch (err: unknown) {
@@ -217,6 +241,7 @@ const IssueCredential = () => {
     } finally {
       setIsLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address, balanceData, airService]);
 
   useEffect(() => {

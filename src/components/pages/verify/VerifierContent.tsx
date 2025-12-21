@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, use } from "react";
+import { useEffect, useState, use, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   Card,
@@ -23,6 +23,7 @@ import {
 import { useAirkit } from "@/hooks/useAirkit";
 import { env } from "@/lib/env";
 import { parseRule } from "@/lib/utils/verification";
+import { updateUserVerification } from "@/lib/actions/users";
 import axios from "axios";
 
 type AuthTokenResponse = {
@@ -74,6 +75,17 @@ const VerifierContent = ({ searchParams }: { searchParams: Promise<{ [key: strin
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [countdown, status, successUrl, failUrl, router]);
 
+  const getUserInfo = useCallback(async () => {
+    if (airService.isLoggedIn) {
+      const userData = await airService.getUserInfo();
+      return {
+        email: userData.user.email,
+        id: userData.user.id,
+      };
+    }
+    return null;
+  }, [airService]);
+
   useEffect(() => {
     if (isInitialized && status === "initializing") {
       setStatus("ready");
@@ -106,10 +118,18 @@ const VerifierContent = ({ searchParams }: { searchParams: Promise<{ [key: strin
         programId: env.NEXT_PUBLIC_VERIFIER_PROGRAM_ID,
         redirectUrl: env.NEXT_PUBLIC_ISSUER_URL || "/issue",
       });
-      console.log({result});
       
       // Step 4: Check if credential meets requirements
       if (result?.status === 'Compliant') {
+        // Update user verification status
+        const userInfo = await getUserInfo();
+        if (userInfo) {
+          await updateUserVerification({
+            airKitId: userInfo.id,
+            isVerified: true,
+          });
+        }
+        
         setStatus("success");
         setMessage(
           `Verification successful!`

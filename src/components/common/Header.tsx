@@ -14,16 +14,18 @@ import { DialogHeader } from "../ui/dialog";
 import { Badge } from "../ui/badge";
 import { PlusCircle } from "lucide-react";
 import { useAppKitAccount } from "@reown/appkit/react";
+import { useCallback } from "react";
+import { useRouter } from "next/navigation";
 
 export const Header = () => {
   const { airService } = useAirkit();
   const { address } = useAppKitAccount();
+  const router = useRouter();
   
-  const logout = async () => {
-    if (airService.isLoggedIn) {
-      await airService.logout();
-    }
-  };
+  const logout = useCallback(() => {
+    airService.logout();
+    router.refresh()
+  }, [airService, router]);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">

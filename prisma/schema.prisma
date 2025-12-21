@@ -39,6 +39,8 @@ model User {
   airKitId      String?
   isCredentialIssued Boolean          @default(false)
   credentialSubject Json?
+  verifiedAt      DateTime?
+  isVerified      Boolean          @default(false)
 }
 
 // AD SUBMISSIONS

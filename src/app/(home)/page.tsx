@@ -1,3 +1,7 @@
+"use client";
+
+import { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,12 +13,149 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Loader2 } from "lucide-react";
 import {
   DebuggingInfo,
 } from "@/components/pages/home/GetStartedView/components";
-// TODO: Add a logic which will check if the user is logged in and has issued credential
+import { useAirkit } from "@/hooks/useAirkit";
+import { checkUserStatus } from "@/lib/actions/users";
+import { buildVerifierUrl } from "@/lib/utils/verification";
 
-const PartnerPage = () => {
+type UserStatus = {
+  exists: boolean;
+  hasCredential: boolean;
+  isVerified: boolean;
+};
+
+const HomePage = () => {
+  const router = useRouter();
+  const { airService, isInitialized } = useAirkit();
+  const [isCheckingStatus, setIsCheckingStatus] = useState(false);
+  const [userStatus, setUserStatus] = useState<UserStatus | null>(null);
+
+  const getUserInfo = useCallback(async () => {
+    if (airService.isLoggedIn) {
+      const userData = await airService.getUserInfo();
+      return {
+        email: userData.user.email,
+        id: userData.user.id,
+      };
+    }
+    return null;
+  }, [airService]);
+
+  useEffect(() => {
+    const checkStatus = async () => {
+      if (!isInitialized || !airService.isLoggedIn) {
+        return;
+      }
+
+      setIsCheckingStatus(true);
+      try {
+        const userInfo = await getUserInfo();
+        if (userInfo) {
+          const status = await checkUserStatus(userInfo.id);
+          setUserStatus({
+            exists: status.exists,
+            hasCredential: status.hasCredential,
+            isVerified: status.isVerified,
+          });
+        }
+      } catch (error) {
+        console.error("Error checking user status:", error);
+      } finally {
+        setIsCheckingStatus(false);
+      }
+    };
+
+    checkStatus();
+  }, [isInitialized, airService.isLoggedIn, getUserInfo, router]);
+
+  // Determine the correct CTA based on user status
+  const renderCTA = useCallback(() => {
+    if (isCheckingStatus) {
+      return (
+        <div className="pt-4">
+          <Button
+            size="lg"
+            disabled
+            className="w-full text-lg h-14 bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg"
+          >
+            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            Checking your status...
+          </Button>
+          <p className="text-xs text-center text-muted-foreground mt-3">
+            Please wait while we verify your credentials
+          </p>
+        </div>
+      );
+    }
+
+    // User exists with credential but needs verification
+    if (userStatus?.exists && userStatus?.hasCredential && !userStatus?.isVerified) {
+      return (
+        <div className="pt-4">
+          <Link href={buildVerifierUrl()} className="block">
+            <Button
+              size="lg"
+              className="w-full text-lg h-14 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg hover:shadow-xl transition-all cursor-pointer"
+            >
+              <span className="flex items-center gap-2">
+                Verify Your Credentials
+                <span className="text-xl">✓</span>
+              </span>
+            </Button>
+          </Link>
+          <p className="text-xs text-center text-muted-foreground mt-3">
+            You have credentials! Complete verification to access the game
+          </p>
+        </div>
+      );
+    }
+
+    // User is verified - show direct access
+    if (userStatus?.exists && userStatus?.isVerified) {
+      return (
+        <div className="pt-4">
+          <Link href="/okx" className="block">
+            <Button
+              size="lg"
+              className="w-full text-lg h-14 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-lg hover:shadow-xl transition-all cursor-pointer"
+            >
+              <span className="flex items-center gap-2">
+                Access Game Now
+                <span className="text-xl">🎮</span>
+              </span>
+            </Button>
+          </Link>
+          <p className="text-xs text-center text-muted-foreground mt-3">
+            You&apos;re verified! Enjoy exclusive access to the game
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="pt-4">
+        <Link href='/issue' className="block">
+          <Button
+            size="lg"
+            className="w-full text-lg h-14 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all cursor-pointer"
+          >
+            <span className="flex items-center gap-2">
+              Play Now - Get Verified
+              <span className="text-xl">→</span>
+            </span>
+          </Button>
+        </Link>
+        <p className="text-xs text-center text-muted-foreground mt-3">
+          DAT Network will verify your wallet credentials and route you
+          to the game
+        </p>
+      </div>
+    );
+  }, [isCheckingStatus, userStatus]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
       {/* Main Content */}
@@ -169,23 +310,8 @@ const PartnerPage = () => {
                 </div>
               </div>
 
-              <div className="pt-4">
-                <Link href='/issue' className="block">
-                  <Button
-                    size="lg"
-                    className="w-full text-lg h-14 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all cursor-pointer"
-                  >
-                    <span className="flex items-center gap-2">
-                      Play Now - Get Verified
-                      <span className="text-xl">→</span>
-                    </span>
-                  </Button>
-                </Link>
-                <p className="text-xs text-center text-muted-foreground mt-3">
-                  DAT Network will verify your wallet credentials and route you
-                  to the game
-                </p>
-              </div>
+              {/* Dynamic CTA based on user status */}
+              {renderCTA()}
             </CardContent>
           </Card>
 
@@ -245,5 +371,4 @@ const PartnerPage = () => {
   );
 }
 
-
-export default PartnerPage;
+export default HomePage;
