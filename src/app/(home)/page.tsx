@@ -12,6 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import {
   DebuggingInfo,
 } from "@/components/pages/home/GetStartedView/components";
+// TODO: Add a logic which will check if the user is logged in and has issued credential
 
 const PartnerPage = () => {
   return (

@@ -20,7 +20,6 @@ enum AdSubmissionStatus {
 }
 
 // AUTH
-
 model Admin {
   id            String          @id @default(uuid())
   username      String          @unique
@@ -30,8 +29,19 @@ model Admin {
   adSubmissions AdSubmission[]
 }
 
-// AD SUBMISSIONS
+// USER DB to trace issued credential per connected wallet, per user
+model User {
+  id            String          @id @default(uuid())
+  walletAddress String          @unique
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  airKitEmail   String?
+  airKitId      String?
+  isCredentialIssued Boolean          @default(false)
+  credentialSubject Json?
+}
 
+// AD SUBMISSIONS
 model AdSubmission {
   id                   String              @id @default(uuid())
   adName               String

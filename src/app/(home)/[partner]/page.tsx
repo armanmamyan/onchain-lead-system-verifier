@@ -116,7 +116,7 @@ export default async function AdvertiserSuccessPage({ params }: PartnerPageProps
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Button
                   size="lg"
-                  className="w-full h-14 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg"
+                  className="w-full h-14 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg cursor-pointer"
                 >
                   <span className="flex items-center gap-2">
                     <Zap className="h-5 w-5" />
@@ -126,7 +126,7 @@ export default async function AdvertiserSuccessPage({ params }: PartnerPageProps
                 <Button
                   size="lg"
                   variant="outline"
-                  className="w-full h-14"
+                  className="w-full h-14 cursor-pointer"
                 >
                   <span className="flex items-center gap-2">
                     <Crown className="h-5 w-5" />

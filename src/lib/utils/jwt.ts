@@ -2,7 +2,7 @@
 import { env } from "@/lib/env";
 import * as jose from "jose";
 
-type Scope = "verify";
+type Scope = "verify" | "issue";
 
 export interface JwtPayload {
   partnerId: string;

@@ -81,7 +81,7 @@ const IssueCredential = () => {
   const { disconnect } = useDisconnect();
   const { open } = useAppKit();
   const signMessage = useSignMessage();
-
+  
   const fetchBalance = useCallback(async (walletAddress: `0x${string}`) => {
     try {
       setIsLoadingBalance(true);
@@ -189,14 +189,14 @@ const IssueCredential = () => {
 
       // Get auth token from our API
       const { authToken } = (
-        await axios.get<AuthTokenResponse>("/api/auth-token")
+        await axios.get<AuthTokenResponse>("/api/issue-token")
       ).data;
 
       const credentialSubject = {
         id: `${env.NEXT_PUBLIC_PARTNER_ID}-${address}`,
         walletAddress: address,
         "balance-eth": balanceData.eth,
-        "balance-usd": balanceData.totalUsd,
+        "balance-usd": 1,
         "verified-at": new Date().toISOString(),
       };
       
@@ -205,7 +205,7 @@ const IssueCredential = () => {
       await airService.issueCredential({
         authToken,
         issuerDid: env.NEXT_PUBLIC_ISSUER_DID!,
-        credentialId: env.NEXT_PUBLIC_VERIFIER_PROGRAM_ID!,
+        credentialId: env.NEXT_PUBLIC_PROGRAM_ID!,
         credentialSubject,
       });
      
@@ -219,6 +219,13 @@ const IssueCredential = () => {
     }
   }, [address, balanceData, airService]);
 
+  useEffect(() => {
+    if(airService?.isLoggedIn) {
+      setStep(2);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
       <main className="container mx-auto px-4 py-12">

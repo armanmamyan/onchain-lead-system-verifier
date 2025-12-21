@@ -41,7 +41,7 @@ export function VerifierModal() {
 
         await airService.verifyCredential({
           authToken,
-          programId: env.NEXT_PUBLIC_VERIFIER_PROGRAM_ID,
+          programId: env.NEXT_PUBLIC_PROGRAM_ID,
           redirectUrl: env.NEXT_PUBLIC_ISSUER_URL,
         });
         setStatus("success");

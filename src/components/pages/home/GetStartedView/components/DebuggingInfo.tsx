@@ -25,7 +25,7 @@ export const DebuggingInfo = () => {
               <Label className="text-xs">Verifier Program ID</Label>
               <Input
                 readOnly
-                value={env.NEXT_PUBLIC_VERIFIER_PROGRAM_ID}
+                value={env.NEXT_PUBLIC_PROGRAM_ID}
                 className="font-mono text-xs h-7"
               />
             </div>

@@ -104,26 +104,17 @@ const VerifierContent = ({ searchParams }: { searchParams: Promise<{ [key: strin
       const result = await airService.verifyCredential({
         authToken,
         programId: env.NEXT_PUBLIC_VERIFIER_PROGRAM_ID,
-        redirectUrl: env.NEXT_PUBLIC_ISSUER_URL,
+        redirectUrl: env.NEXT_PUBLIC_ISSUER_URL || "/issue",
       });
-
+      console.log({result});
+      
       // Step 4: Check if credential meets requirements
-      if (result && result.credentialSubject) {
-        const userBalance = result.credentialSubject.balanceUsd || 0;
-
-        if (userBalance > requiredBalance) {
-          setStatus("success");
-          setMessage(
-            `Verification successful! Your balance: $${userBalance.toLocaleString()}`
-          );
-          setCountdown(3);
-        } else {
-          setStatus("failed");
-          setMessage(
-            `Balance requirement not met. Required: $${requiredBalance.toLocaleString()}, Your balance: $${userBalance.toLocaleString()}`
-          );
-          setCountdown(5);
-        }
+      if (result?.status === 'Compliant') {
+        setStatus("success");
+        setMessage(
+          `Verification successful!`
+        );
+        setCountdown(3);
       } else {
         // No credential found - redirect to issuer
         setStatus("failed");

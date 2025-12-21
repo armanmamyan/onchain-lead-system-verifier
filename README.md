@@ -307,6 +307,7 @@ NEXTAUTH_URL="http://localhost:3000"
 NEXT_PUBLIC_PARTNER_ID="your-partner-id"
 NEXT_PUBLIC_ISSUER_DID="did:polygonid:polygon:amoy:YOUR_DID"
 NEXT_PUBLIC_CREDENTIAL_ID="your-credential-id"
+NEXT_PUBLIC_PROGRAM_ID="your-program-id"
 NEXT_PUBLIC_VERIFIER_PROGRAM_ID="your-verifier-program-id"
 NEXT_PUBLIC_ISSUER_URL="https://developers.sandbox.air3.com"
 
